@@ -1,0 +1,36 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="intec.matdiscreta.taxitapp.MainOverlayFragment"
+    android:clickable="false">
+
+    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="25dp"
+            android:background="#00d03326"></LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#ff2883d0"></LinearLayout>
+    </LinearLayout>
+
+    <view
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        class="intec.matdiscreta.taxitapp.ux.TappButton"
+        android:id="@+id/view"
+        android:layout_gravity="center_horizontal"
+        android:background="#ffd03326"
+        android:text="Get Taxi"
+        android:gravity="center_vertical|center_horizontal" />
+</FrameLayout>
