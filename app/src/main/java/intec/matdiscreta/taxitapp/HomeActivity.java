@@ -15,7 +15,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -89,6 +90,12 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         if(mMap != null && mUserMarker != null) {
             LatLng latLng= new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
             mUserMarker.setPosition(latLng);
+            //Modified
+            //Moves the map camera to the users location and zooms it so the streets can be seen.
+            //The camera update tells the camera where to go with the given LatLong and zooms to
+            //the given level (0 = whole world, 21+ street and specific buildings.
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+            mMap.animateCamera(update);
         }
     }
 
