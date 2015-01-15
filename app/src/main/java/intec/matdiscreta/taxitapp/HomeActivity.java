@@ -135,7 +135,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
         createLocationRequest();
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        mUserMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("Marker"));
+        mUserMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("You are here"));
 
     }
 

@@ -2,33 +2,45 @@
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="intec.matdiscreta.taxitapp.MainOverlayFragment"
-    android:clickable="false">
+    android:clickable="true"
+    android:background="#00000080">
 
-    <!-- TODO: Update blank fragment layout -->
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:background="#00000080">
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="25dp"
-            android:background="#00d03326"></LinearLayout>
+            android:background="#002883d0"/>
 
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="#ff2883d0"></LinearLayout>
+            android:background="#ff2883d0"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Av. Abraham Lincoln #2111"
+                android:id="@+id/textView"
+                android:layout_marginTop="50dp"
+                android:textSize="24dp"
+                android:textColor="#ffffffff"
+                android:textAlignment="center" />
+        </LinearLayout>
     </LinearLayout>
 
-    <view
+    <Button
         android:layout_width="100dp"
         android:layout_height="50dp"
-        class="intec.matdiscreta.taxitapp.ux.TappButton"
-        android:id="@+id/view"
+        android:id="@+id/tapp_btn"
         android:layout_gravity="center_horizontal"
         android:background="#ffd03326"
         android:text="Get Taxi"
