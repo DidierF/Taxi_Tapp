@@ -4,6 +4,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -62,6 +63,11 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
     @Override
     public void onConnected(Bundle connectionHint) {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mCurrentLocation = lastLocation;
+        updateUI();
+
+
         if(mRequestingLocationUpdates) {
             startLocationUpdates();
         }
@@ -87,15 +93,19 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     }
 
     private void updateUI() {
+        LatLng latLng= new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         if(mMap != null && mUserMarker != null) {
-            LatLng latLng= new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-            mUserMarker.setPosition(latLng);
-            //Modified
-            //Moves the map camera to the users location and zooms it so the streets can be seen.
-            //The camera update tells the camera where to go with the given LatLong and zooms to
-            //the given level (0 = whole world, 21+ street and specific buildings.
-            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 15);
-            mMap.animateCamera(update);
+//            mUserMarker.setPosition(latLng);
+        } else {
+            if(mMap != null) {
+//                mUserMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
+                //Modified
+                //Moves the map camera to the users location and zooms it so the streets can be seen.
+                //The camera update tells the camera where to go with the given LatLong and zooms to
+                //the given level (0 = whole world, 21+ street and specific buildings.
+                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
+                mMap.animateCamera(update);
+            }
         }
     }
 
@@ -138,12 +148,15 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        double latitude = mCurrentLocation != null ? mCurrentLocation.getLatitude() : 0;
-        double longitude = mCurrentLocation != null ? mCurrentLocation.getLongitude() : 0;
-
         createLocationRequest();
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-        mUserMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(latitude, longitude)).title("You are here"));
+
+
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setTiltGesturesEnabled(false);
+        mMap.getUiSettings().setCompassEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        mMap.setMyLocationEnabled(true);
 
     }
 

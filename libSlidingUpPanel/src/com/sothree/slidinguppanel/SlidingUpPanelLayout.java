@@ -2,11 +2,15 @@ package com.sothree.slidinguppanel;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Parcel;
@@ -14,6 +18,7 @@ import android.os.Parcelable;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -45,7 +50,7 @@ public class SlidingUpPanelLayout extends ViewGroup {
     /**
      * Default height of the shadow above the peeking out panel
      */
-    private static final int DEFAULT_SHADOW_HEIGHT = 4; // dp;
+    private static final int DEFAULT_SHADOW_HEIGHT = 0; // dp;
 
     /**
      * If no fade color is given by default it will fade to 80% gray.
