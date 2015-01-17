@@ -10,14 +10,14 @@ import android.view.ViewGroup;
 
 
 /**
- * A simple {@link Fragment} subclass.
+ * A simple {@link android.support.v4.app.Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link MainOverlayFragment.OnFragmentInteractionListener} interface
+ * {@link intec.matdiscreta.taxitapp.TaxiMarkerPopUpFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link MainOverlayFragment#newInstance} factory method to
+ * Use the {@link intec.matdiscreta.taxitapp.TaxiMarkerPopUpFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class MainOverlayFragment extends Fragment {
+public class TaxiMarkerPopUpFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -38,8 +38,8 @@ public class MainOverlayFragment extends Fragment {
      * @return A new instance of fragment MainOverlayFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static MainOverlayFragment newInstance(String param1, String param2) {
-        MainOverlayFragment fragment = new MainOverlayFragment();
+    public static TaxiMarkerPopUpFragment newInstance(String param1, String param2) {
+        TaxiMarkerPopUpFragment fragment = new TaxiMarkerPopUpFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -47,7 +47,7 @@ public class MainOverlayFragment extends Fragment {
         return fragment;
     }
 
-    public MainOverlayFragment() {
+    public TaxiMarkerPopUpFragment() {
         // Required empty public constructor
     }
 

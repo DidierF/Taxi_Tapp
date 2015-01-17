@@ -1,25 +1,30 @@
 package intec.matdiscreta.taxitapp;
 
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 
+import java.io.IOException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class HomeActivity extends FragmentActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
@@ -32,6 +37,10 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     private String mLastUpdateTime;
     private Marker mUserMarker;
 
+    private Marker mTaxiMarker;
+    //Used to test
+    private Geocoder mGeoC;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,13 +48,18 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+        mGeoC = new Geocoder(this);
+
         if(mGoogleApiClient != null)
             mGoogleApiClient.connect();
+
     }
 
     @Override
@@ -65,7 +79,11 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     public void onConnected(Bundle connectionHint) {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         mCurrentLocation = lastLocation;
-        updateUI();
+        try {
+            updateUI();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
         if(mRequestingLocationUpdates) {
@@ -88,25 +106,42 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         if(location != null) {
             mCurrentLocation = location;
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            updateUI();
+            try {
+                updateUI();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private void updateUI() {
+    private void updateUI() throws IOException {
         LatLng latLng= new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
         if(mMap != null && mUserMarker != null) {
-//            mUserMarker.setPosition(latLng);
+        	//mUserMarker.setPosition(latLng);
+
         } else {
             if(mMap != null) {
-//                mUserMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
+                //mUserMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
                 //Modified
                 //Moves the map camera to the users location and zooms it so the streets can be seen.
                 //The camera update tells the camera where to go with the given LatLong and zooms to
                 //the given level (0 = whole world, 21+ street and specific buildings.
                 CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
                 mMap.animateCamera(update);
+
+                if(mTaxiMarker == null) {
+                    LatLng taxiPos = new LatLng(mCurrentLocation.getLatitude() + 0.001, mCurrentLocation.getLongitude() + 0.01);
+                    mTaxiMarker = mMap.addMarker(new MarkerOptions().position(taxiPos).title("Taxi"));
+                    CameraUpdate update2 = CameraUpdateFactory.newLatLngZoom(taxiPos, 16);
+                    mMap.animateCamera(update2);
+                }
             }
         }
+
+        ArrayList<Address> addresses = new ArrayList<Address>();
+        	addresses = (ArrayList<Address>) mGeoC.getFromLocation(latLng.latitude, latLng.longitude, 10);
+            MainOverlayFragment overlayFragment = (MainOverlayFragment) this.getSupportFragmentManager().findFragmentById(R.id.overlay_fragment);
+            ((TextView) overlayFragment.getView().findViewById(R.id.addressLabel)).setText(addresses.get(0).getAddressLine(0));
     }
 
     protected void startLocationUpdates() {
@@ -157,6 +192,15 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setMyLocationEnabled(true);
+
+        GoogleMap.OnMarkerClickListener onMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                View popUp;
+                return false;
+            }
+        }
+
 
     }
 
