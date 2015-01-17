@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Av. Abraham Lincoln #2111"
-                android:id="@+id/textView"
+                android:id="@+id/addressLabel"
                 android:layout_marginTop="50dp"
                 android:textSize="24dp"
                 android:textColor="#ffffffff"
