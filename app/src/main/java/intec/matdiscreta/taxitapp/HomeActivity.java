@@ -6,6 +6,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,13 +22,22 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.octo.android.robospice.JacksonSpringAndroidSpiceService;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.SpringAndroidSpiceService;
+import com.octo.android.robospice.persistence.DurationInMillis;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import intec.matdiscreta.taxitapp.api.NearbyTaxisRequest;
+
 public class HomeActivity extends FragmentActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     private GoogleApiClient mGoogleApiClient;
@@ -54,10 +64,12 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     @Override
     protected void onStart() {
         super.onStart();
+        TaxiTappAPI.getInstance().spiceManager.start(this);
+        TaxiTappAPI.getInstance().getTaxis(mMap);
 
         mGeoC = new Geocoder(this);
 
-        if(mGoogleApiClient != null)
+        if (mGoogleApiClient != null)
             mGoogleApiClient.connect();
 
     }
@@ -65,7 +77,10 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     @Override
     protected void onStop() {
         super.onStop();
-        if(mGoogleApiClient != null)
+        TaxiTappAPI.getInstance().spiceManager.shouldStop();
+//        spiceManager.shouldStop();
+
+        if (mGoogleApiClient != null)
             mGoogleApiClient.disconnect();
     }
 
@@ -86,7 +101,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         }
 
 
-        if(mRequestingLocationUpdates) {
+        if (mRequestingLocationUpdates) {
             startLocationUpdates();
         }
     }
@@ -103,7 +118,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
     @Override
     public void onLocationChanged(Location location) {
-        if(location != null) {
+        if (location != null) {
             mCurrentLocation = location;
             mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
             try {
@@ -115,33 +130,27 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     }
 
     private void updateUI() throws IOException {
-        LatLng latLng= new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if(mMap != null && mUserMarker != null) {
-        	//mUserMarker.setPosition(latLng);
+        LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+        if (mMap != null && mUserMarker != null) {
+            //mUserMarker.setPosition(latLng);
 
         } else {
-            if(mMap != null) {
+            if (mMap != null) {
+
                 //mUserMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
                 //Modified
                 //Moves the map camera to the users location and zooms it so the streets can be seen.
                 //The camera update tells the camera where to go with the given LatLong and zooms to
                 //the given level (0 = whole world, 21+ street and specific buildings.
-                CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
-                mMap.animateCamera(update);
-
-                if(mTaxiMarker == null) {
-                    LatLng taxiPos = new LatLng(mCurrentLocation.getLatitude() + 0.001, mCurrentLocation.getLongitude() + 0.01);
-                    mTaxiMarker = mMap.addMarker(new MarkerOptions().position(taxiPos).title("Taxi"));
-                    CameraUpdate update2 = CameraUpdateFactory.newLatLngZoom(taxiPos, 16);
-                    mMap.animateCamera(update2);
-                }
+                //CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
+                //mMap.animateCamera(update);
             }
         }
 
         ArrayList<Address> addresses = new ArrayList<Address>();
-        	addresses = (ArrayList<Address>) mGeoC.getFromLocation(latLng.latitude, latLng.longitude, 10);
-            MainOverlayFragment overlayFragment = (MainOverlayFragment) this.getSupportFragmentManager().findFragmentById(R.id.overlay_fragment);
-            ((TextView) overlayFragment.getView().findViewById(R.id.addressLabel)).setText(addresses.get(0).getAddressLine(0));
+        addresses = (ArrayList<Address>) mGeoC.getFromLocation(latLng.latitude, latLng.longitude, 10);
+        MainOverlayFragment overlayFragment = (MainOverlayFragment) this.getSupportFragmentManager().findFragmentById(R.id.overlay_fragment);
+        ((TextView) overlayFragment.getView().findViewById(R.id.addressLabel)).setText(addresses.get(0).getAddressLine(0));
     }
 
     protected void startLocationUpdates() {
@@ -193,13 +202,12 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setMyLocationEnabled(true);
 
-        GoogleMap.OnMarkerClickListener onMarkerClickListener = new GoogleMap.OnMarkerClickListener() {
+        GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener = new GoogleMap.OnInfoWindowClickListener() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                View popUp;
-                return false;
+            public void onInfoWindowClick(Marker marker) {
+                TaxiTappAPI.getInstance().callTaxi(marker);
             }
-        }
+        };
 
 
     }
@@ -221,4 +229,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
                 .addApi(LocationServices.API)
                 .build();
     }
+
+
+
 }

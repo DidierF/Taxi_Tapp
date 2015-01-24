@@ -4,7 +4,7 @@
     android:versionCode="9"
     android:versionName="2.0.4" >
 
-    <uses-sdk android:minSdkVersion="8" />
+    <uses-sdk android:minSdkVersion="15" />
 
     <application />
 
