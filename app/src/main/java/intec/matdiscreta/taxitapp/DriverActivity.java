@@ -1,9 +1,16 @@
 package intec.matdiscreta.taxitapp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -25,6 +32,7 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
+    private NotificationManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +157,37 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    private void publishNotification(){
+
+        String contentText = "Your taxi is on it's way!";
+
+        Intent notificationIntent = new Intent(this, HomeActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(HomeActivity.class);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        PendingIntent homePendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setAutoCancel(true);
+        builder.setContentTitle("Taxi Tapp");
+        builder.setContentText(contentText);
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setLights(Color.YELLOW, 1000, 1000);
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);
+
+        builder.setContentIntent(homePendingIntent);
+        Notification n = builder.build();
+
+        manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        manager.notify(7, n);
     }
 
 

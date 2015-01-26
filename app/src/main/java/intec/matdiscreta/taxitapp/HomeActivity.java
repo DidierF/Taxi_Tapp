@@ -1,11 +1,18 @@
 package intec.matdiscreta.taxitapp;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,9 +40,8 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     private boolean mRequestingLocationUpdates = true;
     private String mLastUpdateTime;
     private Marker mUserMarker;
-
+    private NotificationManager manager;
     private Marker mTaxiMarker;
-    //Used to test
     private Geocoder mGeoC;
 
     @Override
@@ -45,7 +51,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
-
+        publishNotification();
     }
 
     @Override
@@ -215,6 +221,37 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+    }
+
+    private void publishNotification(){
+
+        String contentText = "Your taxi is on it's way!";
+
+        Intent notificationIntent = new Intent(this, HomeActivity.class);
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(HomeActivity.class);
+        stackBuilder.addNextIntent(notificationIntent);
+
+        PendingIntent homePendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+        builder.setAutoCancel(true);
+        builder.setContentTitle("Taxi Tapp");
+        builder.setContentText(contentText);
+        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setLights(Color.YELLOW, 1000, 1000);
+        builder.setDefaults(Notification.DEFAULT_SOUND);
+        builder.setDefaults(Notification.DEFAULT_VIBRATE);
+
+        builder.setContentIntent(homePendingIntent);
+        Notification n = builder.build();
+
+        manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
+        manager.notify(7, n);
     }
 
 
