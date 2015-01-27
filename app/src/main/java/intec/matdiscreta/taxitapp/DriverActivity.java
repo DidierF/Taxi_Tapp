@@ -43,6 +43,12 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         setUpMapIfNeeded();
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        DriverAlertDialog dialog = new DriverAlertDialog();
+        dialog.show(getSupportFragmentManager(), "");
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -161,14 +167,14 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
 
     private void publishNotification(){
 
-        String contentText = "Your taxi is on it's way!";
+        String contentText = "You have a new request!";
 
-        Intent notificationIntent = new Intent(this, HomeActivity.class);
+        Intent notificationIntent = new Intent(this, DriverActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(HomeActivity.class);
+        stackBuilder.addParentStack(DriverActivity.class);
         stackBuilder.addNextIntent(notificationIntent);
 
-        PendingIntent homePendingIntent =
+        PendingIntent driverPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
@@ -183,7 +189,7 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         builder.setDefaults(Notification.DEFAULT_SOUND);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
 
-        builder.setContentIntent(homePendingIntent);
+        builder.setContentIntent(driverPendingIntent);
         Notification n = builder.build();
 
         manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);

@@ -51,7 +51,6 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
-        publishNotification();
     }
 
     @Override
