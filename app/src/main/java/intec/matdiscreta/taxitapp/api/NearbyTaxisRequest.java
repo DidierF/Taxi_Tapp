@@ -3,6 +3,8 @@ package intec.matdiscreta.taxitapp.api;
 import com.google.android.gms.maps.model.LatLng;
 import com.octo.android.robospice.request.springandroid.SpringAndroidSpiceRequest;
 
+import intec.matdiscreta.taxitapp.TaxiTappAPI;
+
 /**
  * Created by Lou on 1/20/15.
  */
@@ -28,7 +30,7 @@ public class NearbyTaxisRequest extends SpringAndroidSpiceRequest<TaxiList> {
 
     @Override
     public TaxiList loadDataFromNetwork() throws Exception {
-        String url = "http://10.0.0.15:3000/taxis/";
+        String url = TaxiTappAPI.rootUrl + "/taxis/";
 
         return getRestTemplate().getForObject(url, TaxiList.class);
     }

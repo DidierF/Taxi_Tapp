@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -34,6 +35,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import gcm.GcmManager;
 import intec.matdiscreta.taxitapp.api.NearbyTaxisRequest;
 
 public class HomeActivity extends FragmentActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
@@ -45,10 +47,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     private Location mCurrentLocation;
     private boolean mRequestingLocationUpdates = true;
     private String mLastUpdateTime;
-    private Marker mUserMarker;
 
-    private Marker mTaxiMarker;
-    //Used to test
     private Geocoder mGeoC;
 
     @Override
@@ -64,8 +63,10 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     @Override
     protected void onStart() {
         super.onStart();
+        TaxiTappAPI.getInstance().setContext(this);
         TaxiTappAPI.getInstance().spiceManager.start(this);
         TaxiTappAPI.getInstance().getTaxis(mMap);
+        GcmManager.getInstance().startGcm(this);
 
         mGeoC = new Geocoder(this);
 
@@ -78,7 +79,6 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     protected void onStop() {
         super.onStop();
         TaxiTappAPI.getInstance().spiceManager.shouldStop();
-//        spiceManager.shouldStop();
 
         if (mGoogleApiClient != null)
             mGoogleApiClient.disconnect();
@@ -94,6 +94,8 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     public void onConnected(Bundle connectionHint) {
         Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         mCurrentLocation = lastLocation;
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16);
+        mMap.animateCamera(update);
         try {
             updateUI();
         } catch (IOException e) {
@@ -131,20 +133,11 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
     private void updateUI() throws IOException {
         LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if (mMap != null && mUserMarker != null) {
-            //mUserMarker.setPosition(latLng);
-
-        } else {
-            if (mMap != null) {
-
-                //mUserMarker = mMap.addMarker(new MarkerOptions().position(latLng).title("You are here"));
-                //Modified
+        if (mMap != null) {
                 //Moves the map camera to the users location and zooms it so the streets can be seen.
                 //The camera update tells the camera where to go with the given LatLong and zooms to
                 //the given level (0 = whole world, 21+ street and specific buildings.
-                //CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
-                //mMap.animateCamera(update);
-            }
+
         }
 
         ArrayList<Address> addresses = new ArrayList<Address>();
@@ -222,6 +215,13 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
     }
 
+    public void onTappBtnClick(View v) {
+        Log.d("TappBtnClick", "Clicked!");
+        TaxiTappAPI.getInstance().callTaxi(mCurrentLocation);
+        ((Button) v).setEnabled(false);
+        ((Button) v).setText("Loading");
+    }
+
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -229,6 +229,8 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
                 .addApi(LocationServices.API)
                 .build();
     }
+
+
 
 
 

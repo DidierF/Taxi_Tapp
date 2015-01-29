@@ -988,6 +988,11 @@ public class SlidingUpPanelLayout extends ViewGroup {
                 }
             }
 //            canvas.clipRect(mTmpRect);
+//            canvas.drawARGB(ff2883d0);
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.parseColor("#ff2883d0"));
+            canvas.drawPaint(paint);
 
             result = super.drawChild(canvas, child, drawingTime);
 

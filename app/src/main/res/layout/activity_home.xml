@@ -1,3 +1,12 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainFrameLayout"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#002883d0">
+
+
 <view xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/slidingUpPanel"
@@ -12,7 +21,8 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".HomeActivity" />
+        tools:context=".HomeActivity"
+        tools:layout="@layout/abc_activity_chooser_view_list_item" />
 
     <fragment
         android:id="@+id/overlay_fragment"
@@ -24,3 +34,5 @@
         tools:layout="@layout/fragment_main_overlay" />
 
 </view>
+
+    </FrameLayout>

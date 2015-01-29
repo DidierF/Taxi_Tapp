@@ -44,5 +44,6 @@
         android:layout_gravity="center_horizontal"
         android:background="#ffd03326"
         android:text="Get Taxi"
-        android:gravity="center_vertical|center_horizontal" />
+        android:gravity="center_vertical|center_horizontal"
+        android:onClick="onTappBtnClick"/>
 </FrameLayout>
