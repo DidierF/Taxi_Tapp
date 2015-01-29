@@ -5,144 +5,111 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuItem;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-
-import java.io.IOException;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import gcm.GcmManager;
-
-public class HomeActivity extends FragmentActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
 
-    private GoogleMap mMap; // Might be null if Google Play services APK is not available.
+public class DriverActivity extends FragmentActivity implements NewTaxiRequestFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+
+    private GoogleMap mMap;
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mCurrentLocation;
-    private boolean mRequestingLocationUpdates = true;
-    private String mLastUpdateTime;
     private NotificationManager manager;
-    private Geocoder mGeoC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_driver);
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        TaxiTappAPI.getInstance().setContext(this);
-        TaxiTappAPI.getInstance().spiceManager.start(this);
-        TaxiTappAPI.getInstance().getTaxis(mMap);
-        GcmManager.getInstance().startGcm(this);
-
-        mGeoC = new Geocoder(this);
-
-        if (mGoogleApiClient != null)
-            mGoogleApiClient.connect();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        TaxiTappAPI.getInstance().spiceManager.shouldStop();
-
-        if (mGoogleApiClient != null)
-            mGoogleApiClient.disconnect();
-    }
-
-    @Override
-    protected void onResume() {
+    protected void onResume(){
         super.onResume();
-        setUpMapIfNeeded();
+        DriverAlertDialog dialog = new DriverAlertDialog();
+        dialog.show(getSupportFragmentManager(), "");
     }
 
     @Override
-    public void onConnected(Bundle connectionHint) {
-        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        mCurrentLocation = lastLocation;
-        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16);
-        mMap.animateCamera(update);
-        try {
-            updateUI();
-        } catch (IOException e) {
-            e.printStackTrace();
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_driver, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
 
-
-        if (mRequestingLocationUpdates) {
-            startLocationUpdates();
-        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onConnectionSuspended(int cause) {
+    public void onConnected(Bundle bundle) {
 
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionSuspended(int i) {
 
     }
 
     @Override
     public void onLocationChanged(Location location) {
-        if (location != null) {
-            mCurrentLocation = location;
-            mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-            try {
-                updateUI();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private void updateUI() throws IOException {
-        LatLng latLng = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
-        if (mMap != null) {
-                //Moves the map camera to the users location and zooms it so the streets can be seen.
-                //The camera update tells the camera where to go with the given LatLong and zooms to
-                //the given level (0 = whole world, 21+ street and specific buildings.
+        if(mCurrentLocation == null){
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
+            mMap.animateCamera(update);
 
         }
-
-        ArrayList<Address> addresses = new ArrayList<Address>();
-        addresses = (ArrayList<Address>) mGeoC.getFromLocation(latLng.latitude, latLng.longitude, 10);
-        MainOverlayFragment overlayFragment = (MainOverlayFragment) this.getSupportFragmentManager().findFragmentById(R.id.overlay_fragment);
-        ((TextView) overlayFragment.getView().findViewById(R.id.addressLabel)).setText(addresses.get(0).getAddressLine(0));
+        mCurrentLocation = location;
     }
 
-    protected void startLocationUpdates() {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     /**
@@ -190,14 +157,6 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
         mMap.setMyLocationEnabled(true);
 
-        GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener = new GoogleMap.OnInfoWindowClickListener() {
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                TaxiTappAPI.getInstance().callTaxi(marker);
-            }
-        };
-
-
     }
 
     protected void createLocationRequest() {
@@ -206,35 +165,16 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    public void onTappBtnClick(View v) {
-        Log.d("TappBtnClick", "Clicked!");
-        TaxiTappAPI.getInstance().callTaxi(mCurrentLocation);
-        ((Button) v).setEnabled(false);
-        ((Button) v).setText("Loading");
-    }
-
-    protected synchronized void buildGoogleApiClient() {
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .addApi(LocationServices.API)
-                .build();
-    }
-
     private void publishNotification(){
 
-        String contentText = "Your taxi is on it's way!";
+        String contentText = "You have a new request!";
 
-        Intent notificationIntent = new Intent(this, HomeActivity.class);
+        Intent notificationIntent = new Intent(this, DriverActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(HomeActivity.class);
+        stackBuilder.addParentStack(DriverActivity.class);
         stackBuilder.addNextIntent(notificationIntent);
 
-        PendingIntent homePendingIntent =
+        PendingIntent driverPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
@@ -249,15 +189,12 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         builder.setDefaults(Notification.DEFAULT_SOUND);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
 
-        builder.setContentIntent(homePendingIntent);
+        builder.setContentIntent(driverPendingIntent);
         Notification n = builder.build();
 
         manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
         manager.notify(7, n);
     }
-
-
-
 
 
 }

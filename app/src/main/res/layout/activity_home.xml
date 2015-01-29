@@ -13,7 +13,8 @@
     class="com.sothree.slidinguppanel.SlidingUpPanelLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom">
+    android:gravity="bottom"
+    tools:layout="@layout/fragment_main_overlay">
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
@@ -22,7 +23,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context=".HomeActivity"
-        tools:layout="@layout/abc_activity_chooser_view_list_item" />
+        tools:layout="@layout/fragment_main_overlay" />
 
     <fragment
         android:id="@+id/overlay_fragment"
