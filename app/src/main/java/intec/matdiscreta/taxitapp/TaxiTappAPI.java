@@ -1,21 +1,16 @@
 package intec.matdiscreta.taxitapp;
 
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.content.Context;
 import android.location.Location;
-import android.os.Debug;
 import android.util.Log;
 import android.widget.Button;
 
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.octo.android.robospice.JacksonSpringAndroidSpiceService;
 import com.octo.android.robospice.SpiceManager;
-import com.octo.android.robospice.SpringAndroidSpiceService;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
@@ -138,4 +133,9 @@ public class TaxiTappAPI {
     public void setContext(Activity activity) {
         this.context = activity;
     }
+
+    public Session getSession(){
+        return session;
+    }
+
 }
