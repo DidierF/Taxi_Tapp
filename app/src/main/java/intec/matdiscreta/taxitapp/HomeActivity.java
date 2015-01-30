@@ -45,7 +45,6 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     private Location mCurrentLocation;
     private boolean mRequestingLocationUpdates = true;
     private String mLastUpdateTime;
-    private NotificationManager manager;
     private Geocoder mGeoC;
 
     @Override
@@ -226,40 +225,4 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
                 .addApi(LocationServices.API)
                 .build();
     }
-
-    private void publishNotification(){
-
-        String contentText = "Your taxi is on it's way!";
-
-        Intent notificationIntent = new Intent(this, HomeActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(HomeActivity.class);
-        stackBuilder.addNextIntent(notificationIntent);
-
-        PendingIntent homePendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setAutoCancel(true);
-        builder.setContentTitle("Taxi Tapp");
-        builder.setContentText(contentText);
-        builder.setSmallIcon(R.drawable.ic_launcher);
-        builder.setLights(Color.YELLOW, 1000, 1000);
-        builder.setDefaults(Notification.DEFAULT_SOUND);
-        builder.setDefaults(Notification.DEFAULT_VIBRATE);
-
-        builder.setContentIntent(homePendingIntent);
-        Notification n = builder.build();
-
-        manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
-        manager.notify(7, n);
-    }
-
-
-
-
-
 }
