@@ -49,7 +49,7 @@ public class SendRegistrationIdRequest extends SpringAndroidSpiceRequest<EmptyRe
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(parameters, headers);
 
 //        return getRestTemplate().postForObject(url, request, EmptyResponse.class);
-        getRestTemplate().put(url, request, queryParams);
+        getRestTemplate().put(url, request);
         return null;
     }
 
