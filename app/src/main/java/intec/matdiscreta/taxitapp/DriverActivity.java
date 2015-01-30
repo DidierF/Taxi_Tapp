@@ -158,6 +158,14 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
+    private void showNavigation(LatLng location){
+
+        final Intent intent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("google.navigation:q=" + location.latitude + "," + location.longitude));
+        intent.setPackage("com.google.android.apps.maps");
+        startActivity(intent);
+    }
+
     private void publishNotification(){
 
         String contentText = "You have a new request!";
