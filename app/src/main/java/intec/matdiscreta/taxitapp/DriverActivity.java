@@ -44,13 +44,6 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
     }
 
     @Override
-    protected void onResume(){
-        super.onResume();
-        DriverAlertDialog dialog = new DriverAlertDialog();
-        dialog.show(getSupportFragmentManager(), "");
-    }
-
-    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_driver, menu);
