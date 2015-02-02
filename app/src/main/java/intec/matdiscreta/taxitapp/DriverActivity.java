@@ -195,4 +195,11 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
+    private void showNavigation(LatLng location){
+
+        final Intent intent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("google.navigation:q=" + location.latitude + "," + location.longitude));
+        intent.setPackage("com.google.android.apps.maps");
+        startActivity(intent);
+    }
 }
