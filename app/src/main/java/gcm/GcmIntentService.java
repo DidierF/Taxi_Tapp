@@ -15,6 +15,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import intec.matdiscreta.taxitapp.HomeActivity;
 import intec.matdiscreta.taxitapp.R;
+import intec.matdiscreta.taxitapp.StartActivity;
 
 /**
  * Created by Lou on 1/29/15.
@@ -57,7 +58,7 @@ public class GcmIntentService extends IntentService {
 //                        0,
 //                        PendingIntent.FLAG_UPDATE_CURRENT
 //                );
-                PendingIntent.getActivity(this, 0, new Intent(this, HomeActivity.class), 0);
+                PendingIntent.getActivity(this, 0, new Intent(this, StartActivity.class), 0);
 
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);

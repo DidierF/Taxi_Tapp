@@ -6,8 +6,8 @@ package intec.matdiscreta.taxitapp.session;
 public enum Session {
     FIRST_USER(1, "cooldude58", "Chad", "Man"),
     SECOND_USER(2, "somedude42", "Chuck", "Something"),
-    FIRST_TAXI(1, "taximan", "Roberto", "Placeres", true),
-    SECOND_TAXI(2, "cabbers", "Andres", "Marques", true);
+    FIRST_TAXI(3, "taximan", "Roberto", "Placeres", true),
+    SECOND_TAXI(4, "cabbers", "Andres", "Marques", true);
 
     public int id;
     public String username, first_name, last_name;
