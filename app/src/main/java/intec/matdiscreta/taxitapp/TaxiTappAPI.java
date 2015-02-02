@@ -6,6 +6,8 @@ import android.util.Log;
 import android.widget.Button;
 
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -22,6 +24,7 @@ import intec.matdiscreta.taxitapp.api.CallTaxiRequest;
 import intec.matdiscreta.taxitapp.api.NearbyTaxisRequest;
 import intec.matdiscreta.taxitapp.api.SendRegistrationIdRequest;
 import intec.matdiscreta.taxitapp.api.TaxiList;
+import intec.matdiscreta.taxitapp.api.UpdateLocationRequest;
 import intec.matdiscreta.taxitapp.api.UserTaxiCall;
 import intec.matdiscreta.taxitapp.session.Session;
 import intec.matdiscreta.taxitapp.ux.TaxiMarkerData;
@@ -30,24 +33,21 @@ import intec.matdiscreta.taxitapp.ux.TaxiMarkerData;
  * Created by Lou on 1/19/15.
  */
 public class TaxiTappAPI {
-    private static TaxiTappAPI ourInstance = new TaxiTappAPI();
-
-    private Session session = Session.FIRST_USER;
 //    public static String rootUrl = "http://192.168.1.115:3000";
-    public static String rootUrl = "http://10.0.0.19:3000";
-
-
+    public static String rootUrl = "http://10.0.0.16:3000";
+    private static TaxiTappAPI ourInstance = new TaxiTappAPI();
     protected SpiceManager spiceManager = new SpiceManager(JacksonSpringAndroidSpiceService.class);
+    private Session session = Session.FIRST_USER;
     private Map<Marker, TaxiMarkerData> taxiData = new HashMap<Marker, TaxiMarkerData>();
     private UserTaxiCall currentTaxiCall;
-    private Activity context;
-
-    public static TaxiTappAPI getInstance() {
-        return ourInstance;
-    }
+    private UserActivity context;
 
     private TaxiTappAPI() {
 
+    }
+
+    public static TaxiTappAPI getInstance() {
+        return ourInstance;
     }
 
     public void callTaxi(Location location) {
@@ -70,8 +70,29 @@ public class TaxiTappAPI {
         spiceManager.execute(request, request.createCacheKey(), DurationInMillis.ALWAYS_RETURNED, requestListener);
     }
 
-    public boolean callTaxi(Marker marker) {
-        return false;
+    public void callTaxi(Location location, Marker marker) {
+        TaxiMarkerData taxiMarkerData = taxiData.get(marker);
+        int taxiId = taxiMarkerData.id;
+
+        if(taxiMarkerData.available) {
+            CallTaxiRequest request = new CallTaxiRequest(session, location, taxiId);
+
+            RequestListener requestListener = new RequestListener() {
+                @Override
+                public void onRequestFailure(SpiceException e) {
+                    Log.d("RoboSpice", e.toString());
+                    setCurrentTaxiCall(false, null);
+                }
+
+                @Override
+                public void onRequestSuccess(Object o) {
+                    Log.d("RoboSpice", String.valueOf(((UserTaxiCall) o).getPending()));
+                    setCurrentTaxiCall(true, (UserTaxiCall) o);
+                }
+            };
+
+            spiceManager.execute(request, request.createCacheKey(), DurationInMillis.ALWAYS_RETURNED, requestListener);
+        }
     }
 
     public void getTaxis(final GoogleMap map) {
@@ -89,9 +110,14 @@ public class TaxiTappAPI {
                 map.clear();
                 taxiData.clear();
 
+                BitmapDescriptor icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_taxi_marker);
+
                 for (TaxiMarkerData taxiMarkerData : (TaxiList) o) {
                     LatLng latLng = new LatLng(taxiMarkerData.latitude, taxiMarkerData.longitude);
-                    Marker marker = map.addMarker(new MarkerOptions().position(latLng).title(taxiMarkerData.name));
+                    Marker marker = map.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .title(taxiMarkerData.name)
+                            .icon(icon));
                     taxiData.put(marker, taxiMarkerData);
                 }
 
@@ -99,7 +125,7 @@ public class TaxiTappAPI {
             }
         };
 
-        spiceManager.execute(request, request.createCacheKey(), 10 * DurationInMillis.ONE_SECOND, requestListener);
+        spiceManager.execute(request, request.createCacheKey(), 8 * DurationInMillis.ONE_SECOND, requestListener);
     }
 
 
@@ -122,6 +148,27 @@ public class TaxiTappAPI {
 
     }
 
+    public void updateCurrentLocation() {
+        String contextClassName = context.getLocalClassName();
+            UpdateLocationRequest request = new UpdateLocationRequest(session, context);
+
+            RequestListener requestListener = new RequestListener() {
+                @Override
+                public void onRequestFailure(SpiceException e) {
+                    Log.d("RoboSpice", e.toString());
+                }
+
+                @Override
+                public void onRequestSuccess(Object o) {
+                    Log.d("RoboSpice", "Successfully updated user location.");
+                }
+            };
+
+            spiceManager.execute(request, request.createCacheKey(), 8 * DurationInMillis.ONE_SECOND, requestListener);
+    }
+
+
+
     public void setCurrentTaxiCall(boolean successfullyAskedForCab, UserTaxiCall currentTaxiCall) {
         this.currentTaxiCall = currentTaxiCall;
         if(!successfullyAskedForCab) {
@@ -130,7 +177,7 @@ public class TaxiTappAPI {
         }
     }
 
-    public void setContext(Activity activity) {
+    public void setContext(UserActivity activity) {
         this.context = activity;
     }
 

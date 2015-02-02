@@ -1,5 +1,8 @@
 package intec.matdiscreta.taxitapp.api;
 
+import android.location.Location;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.octo.android.robospice.request.springandroid.SpringAndroidSpiceRequest;
 
 import org.springframework.http.HttpEntity;
@@ -9,24 +12,24 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 import intec.matdiscreta.taxitapp.TaxiTappAPI;
+import intec.matdiscreta.taxitapp.UserActivity;
 import intec.matdiscreta.taxitapp.session.Session;
 
 /**
- * Created by Lou on 1/29/15.
+ * Created by Lou on 1/30/15.
  */
-public class SendRegistrationIdRequest extends SpringAndroidSpiceRequest<EmptyResponse> {
+public class UpdateLocationRequest extends SpringAndroidSpiceRequest<EmptyResponse> {
 
-    private Session currentSession;
-    private String regId;
+    Session currentSession;
+    UserActivity userActivity;
 
-    public SendRegistrationIdRequest(Session session, String regId) {
+
+    public UpdateLocationRequest(Session session, UserActivity userActivity) {
         super(EmptyResponse.class);
         this.currentSession = session;
-        this.regId = regId;
+        this.userActivity = userActivity;
     }
 
     @Override
@@ -36,23 +39,23 @@ public class SendRegistrationIdRequest extends SpringAndroidSpiceRequest<EmptyRe
         HttpHeaders headers = new HttpHeaders();
         MultiValueMap<String, Object> parameters = new LinkedMultiValueMap<String, Object>();
 
-        parameters.set("registration_id", regId);
+        Location location = userActivity.getCurrentLocation();
+
+        parameters.set("latitude", userActivity.getCurrentLocation().getLatitude());
+        parameters.set("longitude", userActivity.getCurrentLocation().getLongitude());
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HashMap<String, Object> queryParams = new HashMap<String, Object>();
 
-        queryParams.put("id", Integer.valueOf(currentSession.id));
-        queryParams.put("registration_id", regId);
-
         HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<MultiValueMap<String, Object>>(parameters, headers);
 
-//        return getRestTemplate().postForObject(url, request, EmptyResponse.class);
         getRestTemplate().put(url, request);
         return null;
     }
 
     public String createCacheKey() {
-        return "sendRegId.test";
+        return "updateLocation.test";
     }
+
 }
