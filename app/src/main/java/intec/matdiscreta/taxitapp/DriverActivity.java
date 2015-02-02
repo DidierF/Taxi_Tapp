@@ -5,6 +5,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,14 +26,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.io.IOException;
 
-public class DriverActivity extends FragmentActivity implements NewTaxiRequestFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+import gcm.GcmManager;
+
+
+public class DriverActivity extends UserActivity implements NewTaxiRequestFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
-    private NotificationManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,33 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         setContentView(R.layout.activity_driver);
 
         buildGoogleApiClient();
+        setUpMapIfNeeded();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        TaxiTappAPI.getInstance().setContext(this);
+        TaxiTappAPI.getInstance().spiceManager.start(this);
+        GcmManager.getInstance().startGcm(this);
+
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.connect();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        TaxiTappAPI.getInstance().spiceManager.shouldStop();
+
+        if (mGoogleApiClient != null)
+            mGoogleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         setUpMapIfNeeded();
     }
 
@@ -67,7 +95,14 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
 
     @Override
     public void onConnected(Bundle bundle) {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mCurrentLocation = lastLocation;
+        CameraUpdate update = CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 16);
+        mMap.animateCamera(update);
 
+        if (mRequestingLocationUpdates) {
+            startLocationUpdates();
+        }
     }
 
     @Override
@@ -81,15 +116,17 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
             mMap.animateCamera(update);
-
         }
         mCurrentLocation = location;
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
+    }
 
-
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        TaxiTappAPI.getInstance().updateCurrentLocation();
     }
 
     @Override
@@ -157,37 +194,5 @@ public class DriverActivity extends FragmentActivity implements NewTaxiRequestFr
         mLocationRequest.setInterval(10000);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
-
-    private void publishNotification(){
-
-        String contentText = "You have a new request!";
-
-        Intent notificationIntent = new Intent(this, DriverActivity.class);
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(DriverActivity.class);
-        stackBuilder.addNextIntent(notificationIntent);
-
-        PendingIntent driverPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
-        builder.setAutoCancel(true);
-        builder.setContentTitle("Taxi Tapp");
-        builder.setContentText(contentText);
-        builder.setSmallIcon(R.drawable.ic_launcher);
-        builder.setLights(Color.YELLOW, 1000, 1000);
-        builder.setDefaults(Notification.DEFAULT_SOUND);
-        builder.setDefaults(Notification.DEFAULT_VIBRATE);
-
-        builder.setContentIntent(driverPendingIntent);
-        Notification n = builder.build();
-
-        manager = (NotificationManager) this.getSystemService(NOTIFICATION_SERVICE);
-        manager.notify(7, n);
-    }
-
 
 }

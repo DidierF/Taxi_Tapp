@@ -28,7 +28,6 @@
         android:protectionLevel="signature" />
 
     <uses-permission android:name="intec.matdiscreta.taxitapp.gcm.permission.C2D_MESSAGE" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
     <application
@@ -76,6 +75,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".UserActivity"
+            android:label="@string/title_activity_user" >
         </activity>
     </application>
 

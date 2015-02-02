@@ -36,14 +36,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import gcm.GcmManager;
 
-public class HomeActivity extends FragmentActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
+public class HomeActivity extends UserActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
-    private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
-    private boolean mRequestingLocationUpdates = true;
+
+    private boolean busyCalling = false;
+
     private String mLastUpdateTime;
     private Geocoder mGeoC;
 
@@ -144,6 +143,7 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
 
     protected void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        TaxiTappAPI.getInstance().updateCurrentLocation();
     }
 
     /**
@@ -194,9 +194,12 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
         GoogleMap.OnInfoWindowClickListener onInfoWindowClickListener = new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-                TaxiTappAPI.getInstance().callTaxi(marker);
+                TaxiTappAPI.getInstance().callTaxi(mCurrentLocation, marker);
+                setBusyCalling(true);
             }
         };
+
+        mMap.setOnInfoWindowClickListener(onInfoWindowClickListener);
 
 
     }
@@ -214,8 +217,15 @@ public class HomeActivity extends FragmentActivity implements MainOverlayFragmen
     public void onTappBtnClick(View v) {
         Log.d("TappBtnClick", "Clicked!");
         TaxiTappAPI.getInstance().callTaxi(mCurrentLocation);
-        ((Button) v).setEnabled(false);
-        ((Button) v).setText("Loading");
+        setBusyCalling(true);
+
+    }
+
+    public void setBusyCalling(boolean busyCalling) {
+        this.busyCalling = busyCalling;
+        Button tappBtn = (Button) findViewById(R.id.tapp_btn);
+        tappBtn.setEnabled(false);
+        tappBtn.setText("Loading");
     }
 
     protected synchronized void buildGoogleApiClient() {

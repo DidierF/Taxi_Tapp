@@ -13,11 +13,17 @@ public class StartActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        Intent intent;
         if(TaxiTappAPI.getInstance().getSession().isTaxi){
-
-            startActivity(new Intent(this, DriverActivity.class));
+            intent = new Intent(this, DriverActivity.class);
         } else {
-            startActivity(new Intent(this, HomeActivity.class));
+            intent = new Intent(this, HomeActivity.class);
+        }
+
+        if(intent != null) {
+
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
         }
     }
 
