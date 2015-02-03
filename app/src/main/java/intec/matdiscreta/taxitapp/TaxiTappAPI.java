@@ -33,8 +33,7 @@ import intec.matdiscreta.taxitapp.ux.TaxiMarkerData;
  * Created by Lou on 1/19/15.
  */
 public class TaxiTappAPI {
-//    public static String rootUrl = "http://192.168.1.115:3000";
-    public static String rootUrl = "http://10.0.0.16:3000";
+    public static String rootUrl = "https://taxitapp-intec.herokuapp.com";
     private static TaxiTappAPI ourInstance = new TaxiTappAPI();
     protected SpiceManager spiceManager = new SpiceManager(JacksonSpringAndroidSpiceService.class);
     private Session session = Session.FIRST_USER;
@@ -92,6 +91,8 @@ public class TaxiTappAPI {
             };
 
             spiceManager.execute(request, request.createCacheKey(), DurationInMillis.ALWAYS_RETURNED, requestListener);
+        } else {
+            setCurrentTaxiCall(false, null);
         }
     }
 
