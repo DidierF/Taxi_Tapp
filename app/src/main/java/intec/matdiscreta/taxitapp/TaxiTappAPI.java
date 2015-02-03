@@ -36,7 +36,7 @@ public class TaxiTappAPI {
     public static String rootUrl = "https://taxitapp-intec.herokuapp.com";
     private static TaxiTappAPI ourInstance = new TaxiTappAPI();
     protected SpiceManager spiceManager = new SpiceManager(JacksonSpringAndroidSpiceService.class);
-    private Session session = Session.FIRST_USER;
+    private Session session = Session.FIRST_TAXI;
     private Map<Marker, TaxiMarkerData> taxiData = new HashMap<Marker, TaxiMarkerData>();
     private UserTaxiCall currentTaxiCall;
     private UserActivity context;
