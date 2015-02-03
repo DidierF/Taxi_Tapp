@@ -36,41 +36,44 @@ public class GcmIntentService extends IntentService {
 
         if(!extras.isEmpty()) {
             if(GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                publishNotification();
+                publishNotification(extras);
             }
         }
 
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    private void publishNotification() {
+    private void publishNotification(Bundle extras) {
 
-        String contentText = "Your taxi is on it's way!";
+        String contentText = extras.getString("message");
         manager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent intent = new Intent(this, StartActivity.class);
+        intent.putExtras(extras);
 
 //        Intent notificationIntent = new Intent(this, HomeActivity.class);
 //        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
 //        stackBuilder.addParentStack(HomeActivity.class);
 //        stackBuilder.addNextIntent(notificationIntent);
 
-        PendingIntent homePendingIntent =
+        PendingIntent pendingIntent =
 //                stackBuilder.getPendingIntent(
 //                        0,
 //                        PendingIntent.FLAG_UPDATE_CURRENT
 //                );
-                PendingIntent.getActivity(this, 0, new Intent(this, StartActivity.class), 0);
+                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
         builder.setAutoCancel(true);
         builder.setContentTitle("Taxi Tapp");
         builder.setContentText(contentText);
-        builder.setSmallIcon(R.drawable.ic_launcher);
+        builder.setSmallIcon(R.drawable.ic_taxi_marker);
         builder.setLights(Color.YELLOW, 1000, 1000);
         builder.setDefaults(Notification.DEFAULT_SOUND);
         builder.setDefaults(Notification.DEFAULT_VIBRATE);
 
-        builder.setContentIntent(homePendingIntent);
+        builder.setContentIntent(pendingIntent);
         Notification n = builder.build();
 
         manager.notify(7, n);
