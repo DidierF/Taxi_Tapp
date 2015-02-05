@@ -1,17 +1,11 @@
 package intec.matdiscreta.taxitapp;
 
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.app.AlertDialog;
 import android.content.Intent;
-import android.graphics.Color;
-import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -26,8 +20,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.IOException;
-
 import gcm.GcmManager;
 
 
@@ -39,6 +31,15 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver);
+
+        Bundle extras = getIntent().getExtras();
+        Log.d("Bundle", "onCreate");
+        Log.d("Bundle", "Exists: " + String.valueOf(savedInstanceState != null));
+        if (extras != null) {
+            Log.d("Bundle", String.valueOf(extras.get("message")));
+            DriverAlertDialog dialog = new DriverAlertDialog();
+            dialog.show(this.getSupportFragmentManager(), "TaxiRequest");
+        }
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
@@ -79,6 +80,19 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
     }
 
     @Override
+    protected void onNewIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        Log.d("Bundle", "onNewIntent");
+        Log.d("Bundle", "Exists: " + String.valueOf(extras != null));
+        if (extras != null) {
+            Log.d("Bundle", extras.toString());
+            DriverAlertDialog dialog = new DriverAlertDialog();
+            dialog.setArguments(extras);
+            dialog.show(this.getSupportFragmentManager(), "TaxiRequest");
+        }
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -112,7 +126,7 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
 
     @Override
     public void onLocationChanged(Location location) {
-        if(mCurrentLocation == null){
+        if (mCurrentLocation == null) {
             LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(latLng, 16);
             mMap.animateCamera(update);
@@ -195,7 +209,7 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    private void showNavigation(LatLng location){
+    private void showNavigation(LatLng location) {
 
         final Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("google.navigation:q=" + location.latitude + "," + location.longitude));
