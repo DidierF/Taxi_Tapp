@@ -8,35 +8,34 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
 import intec.matdiscreta.taxitapp.TaxiTappAPI;
 import intec.matdiscreta.taxitapp.session.Session;
 
 /**
- * Created by Lou on 1/29/15.
+ * Created by Lou on 2/4/15.
  */
-public class SendRegistrationIdRequest extends SpringAndroidSpiceRequest<EmptyResponse> {
+public class RespondCallRequest extends SpringAndroidSpiceRequest<EmptyResponse> {
 
+    private int callId;
+    private boolean response;
     private Session currentSession;
-    private String regId;
 
-    public SendRegistrationIdRequest(Session session, String regId) {
+    public RespondCallRequest(Session session, int callId, boolean response) {
         super(EmptyResponse.class);
+        this.callId = callId;
+        this.response = response;
         this.currentSession = session;
-        this.regId = regId;
     }
 
     @Override
     public EmptyResponse loadDataFromNetwork() throws Exception {
-        String url = TaxiTappAPI.rootUrl + "/users/" + currentSession.id;
+        String url = TaxiTappAPI.rootUrl + "/user_taxi_calls/" + callId;
 
         HttpHeaders headers = new HttpHeaders();
         MultiValueMap<String, Object> parameters = new LinkedMultiValueMap<String, Object>();
 
-        parameters.set("registration_id", regId);
+        parameters.set("taxi_id", currentSession.id);
+        parameters.set("accepted", response);
 
         headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -47,6 +46,7 @@ public class SendRegistrationIdRequest extends SpringAndroidSpiceRequest<EmptyRe
     }
 
     public String createCacheKey() {
-        return "sendRegId.test";
+        return "respondCall.test";
     }
+
 }

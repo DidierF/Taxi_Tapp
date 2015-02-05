@@ -34,12 +34,7 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
 
         Bundle extras = getIntent().getExtras();
         Log.d("Bundle", "onCreate");
-        Log.d("Bundle", "Exists: " + String.valueOf(savedInstanceState != null));
-        if (extras != null) {
-            Log.d("Bundle", String.valueOf(extras.get("message")));
-            DriverAlertDialog dialog = new DriverAlertDialog();
-            dialog.show(this.getSupportFragmentManager(), "TaxiRequest");
-        }
+        showDriverRequestDialog(extras);
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
@@ -84,8 +79,11 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
         Bundle extras = intent.getExtras();
         Log.d("Bundle", "onNewIntent");
         Log.d("Bundle", "Exists: " + String.valueOf(extras != null));
+        showDriverRequestDialog(extras);
+    }
+
+    protected void showDriverRequestDialog(Bundle extras) {
         if (extras != null) {
-            Log.d("Bundle", extras.toString());
             DriverAlertDialog dialog = new DriverAlertDialog();
             dialog.setArguments(extras);
             dialog.show(this.getSupportFragmentManager(), "TaxiRequest");
@@ -209,7 +207,7 @@ public class DriverActivity extends UserActivity implements NewTaxiRequestFragme
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
-    private void showNavigation(LatLng location) {
+    public void showNavigation(LatLng location) {
 
         final Intent intent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse("google.navigation:q=" + location.latitude + "," + location.longitude));

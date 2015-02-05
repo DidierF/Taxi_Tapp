@@ -35,6 +35,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import gcm.GcmManager;
+import intec.matdiscreta.taxitapp.api.NearbyTaxisRequest;
 
 public class HomeActivity extends UserActivity implements MainOverlayFragment.OnFragmentInteractionListener, GoogleApiClient.ConnectionCallbacks, LocationListener, GoogleApiClient.OnConnectionFailedListener {
 
@@ -50,6 +51,13 @@ public class HomeActivity extends UserActivity implements MainOverlayFragment.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        Bundle extras = getIntent().getExtras();
+        Log.d("Bundle", "onCreate");
+        if(extras != null && extras.getBoolean("accepted")) {
+            validateBusyStatus(extras);
+            setOMWToMode(true);
+        }
 
         buildGoogleApiClient();
         setUpMapIfNeeded();
@@ -141,6 +149,11 @@ public class HomeActivity extends UserActivity implements MainOverlayFragment.On
         ((TextView) overlayFragment.getView().findViewById(R.id.addressLabel)).setText(addresses.get(0).getAddressLine(0));
     }
 
+    protected void validateBusyStatus(Bundle extras) {
+        if(extras != null && extras.getBoolean("accepted"))
+            setBusyCalling(false, true);
+    }
+
     protected void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         TaxiTappAPI.getInstance().updateCurrentLocation();
@@ -204,6 +217,24 @@ public class HomeActivity extends UserActivity implements MainOverlayFragment.On
 
     }
 
+    @Override
+    protected void onNewIntent(Intent intent) {
+        Bundle extras = intent.getExtras();
+        Log.d("Bundle", "onNewIntent");
+        Log.d("Bundle", "Exists: " + String.valueOf(extras != null));
+        validateBusyStatus(extras);
+        setOMWToMode(true);
+    }
+
+    protected void setOMWToMode(boolean state) {
+        TaxiTappAPI.getInstance().spiceManager.cancel(NearbyTaxisRequest.class, "nearbyTaxis.test");
+        if(state)
+            TaxiTappAPI.getInstance().getTaxis(mMap, true);
+        else
+            TaxiTappAPI.getInstance().getTaxis(mMap);
+
+    }
+
     protected void createLocationRequest() {
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(10000);
@@ -222,11 +253,23 @@ public class HomeActivity extends UserActivity implements MainOverlayFragment.On
     }
 
     public void setBusyCalling(boolean busyCalling) {
+        setBusyCalling(busyCalling, false);
+    }
+
+    public void setBusyCalling(boolean busyCalling, boolean successfullyAskedForCab) {
         this.busyCalling = busyCalling;
         Button tappBtn = (Button) findViewById(R.id.tapp_btn);
         tappBtn.setEnabled(false);
-        tappBtn.setText("Loading");
+        if(busyCalling)
+            tappBtn.setText("Loading");
+        else {
+            if (successfullyAskedForCab)
+                tappBtn.setText("Waiting");
+            else
+                tappBtn.setText("Get Taxi");
+        }
     }
+
 
     protected synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)

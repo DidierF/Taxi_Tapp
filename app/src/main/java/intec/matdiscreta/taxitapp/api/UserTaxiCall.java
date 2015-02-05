@@ -11,4 +11,8 @@ public class UserTaxiCall {
     public boolean getPending() {
         return pending;
     }
+
+    public int getId() {
+        return id;
+    }
 }

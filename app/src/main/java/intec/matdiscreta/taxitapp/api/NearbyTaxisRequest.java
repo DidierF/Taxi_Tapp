@@ -1,5 +1,7 @@
 package intec.matdiscreta.taxitapp.api;
 
+import android.util.Log;
+
 import com.google.android.gms.maps.model.LatLng;
 import com.octo.android.robospice.request.springandroid.SpringAndroidSpiceRequest;
 
@@ -13,9 +15,11 @@ import intec.matdiscreta.taxitapp.TaxiTappAPI;
 public class NearbyTaxisRequest extends SpringAndroidSpiceRequest<TaxiList> {
     private double latitude;
     private double longitude;
+    private boolean omwToMode;
 
-    public NearbyTaxisRequest() {
+    public NearbyTaxisRequest(boolean omwToMode) {
         super(TaxiList.class);
+        this.omwToMode = omwToMode;
     }
 
     public NearbyTaxisRequest(double latitude, double longitude) {
@@ -32,7 +36,10 @@ public class NearbyTaxisRequest extends SpringAndroidSpiceRequest<TaxiList> {
 
     @Override
     public TaxiList loadDataFromNetwork() throws Exception {
+//        String specificResource = omwToMode ? String.valueOf(TaxiTappAPI.getInstance().getSession().id) : "";
+//        Log.d("RoboSpiceCancel", "Check requesting..." + String.valueOf(specificResource));
         String url = TaxiTappAPI.rootUrl + "/taxis/";
+        Log.d("RoboSpiceCancel", url);
 
         TaxiList taxiList= getRestTemplate().getForObject(url, TaxiList.class);
 
